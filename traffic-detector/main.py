@@ -46,10 +46,14 @@ def detect2(traffic: Traffic):
     return traffic
 
 
+IS_MALICIOUS_ENUM = [0, 1, 2]
+WEIGHTS = [0.85, 0.1, 0.05]
+
+
 @app.post("/test")
 def test_detect(traffic_list: List[Traffic]):
     for traffic in traffic_list:
-        traffic.IsMalicious = random.randint(0, 2)
+        traffic.IsMalicious = random.choices(IS_MALICIOUS_ENUM, weights=WEIGHTS)[0]
 
     result = [traffic.IsMalicious for traffic in traffic_list]
     print(result)
@@ -58,7 +62,7 @@ def test_detect(traffic_list: List[Traffic]):
 
 @app.post("/test2")
 def test_detect2(traffic: Traffic):
-    traffic.IsMalicious = random.randint(0, 2)
+    traffic.IsMalicious = random.choices(IS_MALICIOUS_ENUM, weights=WEIGHTS)[0]
     print(traffic.IsMalicious)
     return traffic
 
