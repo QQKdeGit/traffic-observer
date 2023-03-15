@@ -8,30 +8,12 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/elazarl/goproxy"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
-
-// var (
-// 	testTraffic = TrafficMetadata{
-// 		UserAgent:        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/110.0",
-// 		Method:           "GET",
-// 		Proto:            "HTTP/1.1",
-// 		ProtoMajor:       1,
-// 		ProtoMinor:       1,
-// 		ContentLength:    0,
-// 		TransferEncoding: []string{},
-// 		Close:            false,
-// 		RemoteAddr:       "172.20.48.1:50743",
-// 		RequestURI:       "http://www.yiidian.com/questions/30562",
-// 		Scheme:           "http",
-// 		Host:             "www.yiidian.com",
-// 		Path:             "/questions/30562",
-// 		IsMalicious:      0,
-// 	}
-// )
 
 var TEST_MODE = true
 
@@ -54,14 +36,13 @@ func setGoProxy(listenPort int) {
 
 	proxy.OnRequest().DoFunc(func(req *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
 		traffic := TrafficMetadata{
-			UserAgent:     req.UserAgent(),
-			Method:        req.Method,
-			Proto:         req.Proto,      // "HTTP/1.0"
-			ProtoMajor:    req.ProtoMajor, // 1
-			ProtoMinor:    req.ProtoMinor, // 0
-			ContentLength: req.ContentLength,
-			// TransferEncoding: req.TransferEncoding,
-			TransferEncoding: []string{},
+			UserAgent:        req.UserAgent(),
+			Method:           req.Method,
+			Proto:            req.Proto,      // "HTTP/1.0"
+			ProtoMajor:       req.ProtoMajor, // 1
+			ProtoMinor:       req.ProtoMinor, // 0
+			ContentLength:    req.ContentLength,
+			TransferEncoding: req.TransferEncoding,
 			Close:            req.Close,
 			RemoteAddr:       req.RemoteAddr,
 			RequestURI:       req.RequestURI,
@@ -71,13 +52,24 @@ func setGoProxy(listenPort int) {
 			IsMalicious:      -1.0,
 		}
 
-		fmt.Printf("%#v\n", traffic)
+		if req.TransferEncoding == nil {
+			traffic.TransferEncoding = []string{}
+		}
 
-		// trafficArray = append(trafficArray, trafficDetect(traffic))
-		trafficArray = append(trafficArray, traffic)
-
+		trafficToDetector = append(trafficToDetector, traffic)
 		return req, nil
 	})
+
+	go func() {
+		for {
+			time.Sleep(5 * time.Second)
+
+			if len(trafficToDetector) != 0 {
+				trafficToPrometheus = append(trafficToPrometheus, trafficDetect(trafficToDetector)...)
+				trafficToDetector = nil
+			}
+		}
+	}()
 
 	log.Printf("Proxy listening on port %d", listenPort)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", listenPort), proxy))
@@ -124,17 +116,18 @@ type TrafficMetadata struct {
 	IsMalicious      float64 // -1 = undefined, 0 = benign, 1 = malicious,
 }
 
-var trafficArray []TrafficMetadata
+var trafficToPrometheus []TrafficMetadata
+var trafficToDetector []TrafficMetadata
 
 func (u *TrafficCollector) Describe(d chan<- *prometheus.Desc) {
 	d <- trafficDesc
 }
 
 func (u *TrafficCollector) Collect(m chan<- prometheus.Metric) {
-	log.Printf("Traffic Sum = %d", len(trafficArray))
+	log.Printf("Traffic Sum = %d", len(trafficToPrometheus))
 
-	for _, v := range trafficArray {
-		m <- prometheus.MustNewConstMetric(trafficDesc, prometheus.GaugeValue, float64(len(trafficArray)),
+	for _, v := range trafficToPrometheus {
+		m <- prometheus.MustNewConstMetric(trafficDesc, prometheus.GaugeValue, float64(len(trafficToPrometheus)),
 			v.UserAgent,
 			v.Method,
 			v.Proto,
@@ -152,7 +145,7 @@ func (u *TrafficCollector) Collect(m chan<- prometheus.Metric) {
 		)
 	}
 
-	trafficArray = nil
+	trafficToPrometheus = nil
 }
 
 func setHTTPServer(serverPort int) {
@@ -169,32 +162,84 @@ func setHTTPServer(serverPort int) {
 func trafficDetect(trafficList []TrafficMetadata) []TrafficMetadata {
 	arg, err := json.Marshal(trafficList)
 	if err != nil {
-		log.Fatal("error:", err)
+		log.Fatal("Marshal error: ", err)
 	}
 
 	var resp *http.Response
 
 	if TEST_MODE {
-		resp, err = http.Post("http://localhost:8000/test", "application/json", strings.NewReader(string(arg)))
+		resp, err = http.Post("http://traffic-detector:8000/test", "application/json", strings.NewReader(string(arg)))
 		if err != nil {
-			log.Fatal("error:", err)
+			log.Fatal("Post to detector error: ", err)
 		}
 	} else {
-		resp, err = http.Post("http://localhost:8000/detect", "application/json", strings.NewReader(string(arg)))
+		resp, err = http.Post("http://traffic-detector:8000/detect", "application/json", strings.NewReader(string(arg)))
 		if err != nil {
-			log.Fatal("error:", err)
+			log.Fatal("Post to detector error: ", err)
 		}
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal("error:", err)
+		log.Fatal("Read response body error: ", err)
 	}
 
 	err = json.Unmarshal(body, &trafficList)
 	if err != nil {
-		log.Fatal("error:", err)
+		log.Fatal("Unmarshal error: ", err)
 	}
 
 	return trafficList
 }
+
+// func singleTrafficDetect(traffic TrafficMetadata) TrafficMetadata {
+// 	arg, err := json.Marshal(traffic)
+// 	if err != nil {
+// 		log.Fatal("error:", err)
+// 	}
+
+// 	var resp *http.Response
+
+// 	if TEST_MODE {
+// 		resp, err = http.Post("http://traffic-detector:8000/test2", "application/json", strings.NewReader(string(arg)))
+// 		if err != nil {
+// 			log.Fatal("error:", err)
+// 		}
+// 	} else {
+// 		resp, err = http.Post("http://traffic-detector:8000/detect2", "application/json", strings.NewReader(string(arg)))
+// 		if err != nil {
+// 			log.Fatal("error:", err)
+// 		}
+// 	}
+
+// 	body, err := io.ReadAll(resp.Body)
+// 	if err != nil {
+// 		log.Fatal("error:", err)
+// 	}
+
+// 	err = json.Unmarshal(body, &traffic)
+// 	if err != nil {
+// 		log.Fatal("error:", err)
+// 	}
+
+// 	return traffic
+// }
+
+// var (
+// 	testTraffic = TrafficMetadata{
+// 		UserAgent:        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/110.0",
+// 		Method:           "GET",
+// 		Proto:            "HTTP/1.1",
+// 		ProtoMajor:       1,
+// 		ProtoMinor:       1,
+// 		ContentLength:    0,
+// 		TransferEncoding: []string{},
+// 		Close:            false,
+// 		RemoteAddr:       "172.20.48.1:50743",
+// 		RequestURI:       "http://www.yiidian.com/questions/30562",
+// 		Scheme:           "http",
+// 		Host:             "www.yiidian.com",
+// 		Path:             "/questions/30562",
+// 		IsMalicious:      0,
+// 	}
+// )
