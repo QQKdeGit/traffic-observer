@@ -39,6 +39,13 @@ def detect(traffic_list: List[Traffic]):
     return traffic_list
 
 
+@app.post("/detect2")
+def detect2(traffic: Traffic):
+    traffic.IsMalicious = traffic_detect([traffic.Method + ' ' + traffic.Path])[0]
+    print(traffic.IsMalicious)
+    return traffic
+
+
 @app.post("/test")
 def test_detect(traffic_list: List[Traffic]):
     for traffic in traffic_list:
@@ -49,5 +56,12 @@ def test_detect(traffic_list: List[Traffic]):
     return traffic_list
 
 
+@app.post("/test2")
+def test_detect2(traffic: Traffic):
+    traffic.IsMalicious = random.randint(0, 2)
+    print(traffic.IsMalicious)
+    return traffic
+
+
 if __name__ == '__main__':
-    uvicorn.run("main:app", host="localhost", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
