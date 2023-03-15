@@ -52,14 +52,17 @@ func setGoProxy(listenPort int) {
 			IsMalicious:      -1.0,
 		}
 
+		// TransferEncoding may be nil
 		if req.TransferEncoding == nil {
 			traffic.TransferEncoding = []string{}
 		}
 
+		// traffic cache for detector
 		trafficToDetector = append(trafficToDetector, traffic)
 		return req, nil
 	})
 
+	// set timer to send traffic to detector
 	go func() {
 		for {
 			time.Sleep(5 * time.Second)
@@ -77,7 +80,7 @@ func setGoProxy(listenPort int) {
 
 var trafficDesc = prometheus.NewDesc(
 	prometheus.BuildFQName("httpproxy", "traffic", "info"),
-	"Labeled system information as provided by the uname system call.",
+	"Traffic information",
 	[]string{
 		"UserAgent",
 		"Method",
@@ -162,7 +165,8 @@ func setHTTPServer(serverPort int) {
 func trafficDetect(trafficList []TrafficMetadata) []TrafficMetadata {
 	arg, err := json.Marshal(trafficList)
 	if err != nil {
-		log.Fatal("Marshal error: ", err)
+		log.Println("Marshal error: ", err)
+		return nil
 	}
 
 	var resp *http.Response
@@ -170,23 +174,27 @@ func trafficDetect(trafficList []TrafficMetadata) []TrafficMetadata {
 	if TEST_MODE {
 		resp, err = http.Post("http://traffic-detector:8000/test", "application/json", strings.NewReader(string(arg)))
 		if err != nil {
-			log.Fatal("Post to detector error: ", err)
+			log.Println("Post to detector error: ", err)
+			return nil
 		}
 	} else {
 		resp, err = http.Post("http://traffic-detector:8000/detect", "application/json", strings.NewReader(string(arg)))
 		if err != nil {
-			log.Fatal("Post to detector error: ", err)
+			log.Println("Post to detector error: ", err)
+			return nil
 		}
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal("Read response body error: ", err)
+		log.Println("Read response body error: ", err)
+		return nil
 	}
 
 	err = json.Unmarshal(body, &trafficList)
 	if err != nil {
-		log.Fatal("Unmarshal error: ", err)
+		log.Println("Unmarshal error: ", err)
+		return nil
 	}
 
 	return trafficList
