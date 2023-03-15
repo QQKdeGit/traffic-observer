@@ -5,9 +5,9 @@ services:
   prometheus:
     image: bitnami/prometheus
     container_name: prometheus
-    network_mode: host
-    # ports:
-    #   - 9090:9090
+    # network_mode: host
+    ports:
+      - 9090:9090
     user: "1000:1000"
     restart: unless-stopped
     command:
@@ -19,9 +19,9 @@ services:
   grafana:
     image: grafana/grafana
     container_name: grafana
-    network_mode: host
-    # ports:
-    #   - 3000:3000
+    # network_mode: host
+    ports:
+      - 3000:3000
     user: "1000:1000"
     restart: unless-stopped
     volumes:
@@ -30,16 +30,16 @@ services:
   httpproxy:
     image: httpproxy
     container_name: httpproxy
-    network_mode: host
-    # ports:
-    #   - 8079:8079
-    #   - 8080:8080
+    # network_mode: host
+    ports:
+      - 8079:8079
+      - 8080:8080
     restart: unless-stopped
 
-  # traffic-detector:
-  #   image: traffic-detector
-  #   container_name: traffic-detector
-  #   network_mode: host
-  #   # ports:
-  #   #   - 8000:8000
-  #   restart: unless-stopped
+  traffic-detector:
+    image: traffic-detector
+    container_name: traffic-detector
+    # network_mode: host
+    ports:
+      - 8000:8000
+    restart: unless-stopped
