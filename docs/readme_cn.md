@@ -27,11 +27,11 @@ Traffic Observer 是一个[云原生](https://github.com/cncf/toc/blob/main/DEFI
 - `Grafana` ：提供可视化、用户管理功能
 - `Docker` ：容器解决方案
 
-系统架构充分考虑到了云原生时代的需求，于是 Traffic Observer 尽量设计成**低耦合（loosely coupled）、可扩展（scalable）、轻量（lightweight）、可移植（portable）**的。
+系统架构充分考虑到了云原生时代的需求，于是 Traffic Observer 尽量设计成 **低耦合（loosely coupled）、可扩展（scalable）、轻量（lightweight）、可移植（portable）** 的。
 
 
 
-从整体来看，整个系统主要采用了**微服务、容器化和 DevOps **三个概念，下面逐一介绍：
+从整体来看，整个系统主要采用了 **微服务、容器化和 DevOps** 三个概念，下面逐一介绍：
 
 #### 微服务
 
