@@ -19,7 +19,7 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Compile httpproxy
-        run: make build
+        run: cd httproxy && make build
 
       - name: Build and push httpproxy
         uses: docker/build-push-action@v2
