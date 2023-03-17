@@ -19,17 +19,18 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Build and push httpproxy
+        run: make build
         uses: docker/build-push-action@v2
         with:
-          context: .
-          file: ./httpproxy/Dockerfile
+          context: ./httpproxy
+          file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/httpproxy:latest
 
       - name: Build and push traffic-detector
         uses: docker/build-push-action@v2
         with:
-          context: .
-          file: ./traffic-detector/Dockerfile
+          context: ./traffic-detector
+          file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/traffic-detector:latest
