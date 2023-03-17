@@ -6,7 +6,9 @@ Traffic Observer 是一个[云原生](https://github.com/cncf/toc/blob/main/DEFI
 
 ## 架构概述
 
-<img alt="Architecture" src="/images/architecture.svg" width="50%">
+<p align="center">
+  <img alt="Architecture" src="/docs/images/architecture-cn.svg" width="50%">
+</p>
 
 鸟瞰 Traffic Observer ，整个项目可以分为四个部分：HTTP 代理、流量检测器、Prometheus 以及 Grafana 。其功能分别为：
 

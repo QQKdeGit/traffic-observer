@@ -8,7 +8,9 @@ See the [中文文档](/docs/readme_cn.md) for Chinese readme.
 
 ## Architecture overview
 
-<img alt="Architecture" src="/images/architecture.svg" width="50%">
+<p align="center">
+  <img alt="Architecture" src="/docs/images/architecture.svg" width="50%">
+</p>
 
 Look down from above Traffic Observer, the whole project can be divided into four parts: HTTP Proxy, Traffic Detector, Prometheus and Grafana. They work as follows:
 
