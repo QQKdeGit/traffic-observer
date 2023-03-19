@@ -2,14 +2,14 @@
 
 Traffic Observer is a cloud native traffic real-time monitoring system. Including traffic data preprocessing, feature extraction, malicious traffic detection, detection result management, visualization, user management and other functions.
 
-See the [中文文档](/docs/readme_cn.md) for Chinese readme.
+See the [中文文档](docs/readme_cn.md) for Chinese readme.
 
 
 
 ## Architecture overview
 
 <p align="center">
-  <img alt="Architecture" src="/docs/images/architecture.svg" width="60%">
+  <img alt="Architecture" src="docs/images/architecture.svg" width="60%">
 </p>
 
 
