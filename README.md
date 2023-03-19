@@ -9,13 +9,14 @@ See the [中文文档](/docs/readme_cn.md) for Chinese readme.
 ## Architecture overview
 
 <p align="center">
-  <img alt="Architecture" src="/docs/images/architecture.svg" width="50%">
+  <img alt="Architecture" src="/docs/images/architecture.svg" width="60%">
 </p>
+
 
 Look down from above Traffic Observer, the whole project can be divided into four parts: HTTP Proxy, Traffic Detector, Prometheus and Grafana. They work as follows:
 
 1. HTTP Proxy: Receive an HTTP request to visit a web, extract traffic information, and send it as POST request parameters to Traffic Detector
-2. Traffic Detector: Whenever a POST request from the HTTP Proxy is received, Traffic Detector parse the parameters into an array of HTTP request, analyze the traffic for malicious traffic, and return the result
+2. Traffic Detector: Receive a POST request from the HTTP Proxy, analyze the traffic for malicious traffic, and return the result
 3. [Prometheus](https://prometheus.io): Send a request to the HTTP Proxy, obtain the analyzed traffic information, and store it in the time-series database
 4. [Grafana](https://grafana.com): Get data from Prometheus, provide visualization, user management and other functions
 
@@ -33,7 +34,7 @@ The system architecture fully considers the demands of the cloud native era, so 
 
 
 
-On the whole, the system mainly adopts three concepts of microservice, containerization and DevOps, which are as follows:
+On the whole, the system mainly adopts three concepts of **microservice, containerization and DevOps**, which are as follows:
 
 #### Microservice
 
@@ -41,11 +42,11 @@ In order to be loosely coupled and scalable, the system is basically doomed to a
 
 #### DevOps
 
-In order to speed up the construction, testing and release of Traffic Observer, GitHub Actions is used to build a DevOps Pipeline, the core of which is CI/CD. Once the repository receives the commit from the branch master, the pipeline is triggered, followed by static code checking and project building. After the build is complete, the HTTP Proxy and the Traffic Detector will be packaged into Docker images and published to Docker Hub so that we can deploy it in the phase of CI.
+In order to speed up the compiling, testing and release of Traffic Observer, GitHub Actions is used to build a DevOps Pipeline, the core of which is CI/CD. Once the repository receives the commit from the branch master, the pipeline is triggered, followed by static code checking and project building. After the build is complete, the HTTP Proxy and the Traffic Detector will be packaged into Docker images and published to Docker Hub so that we can deploy it in the phase of CI.
 
 #### Containerization
 
-Containerization is also the foundation of the cloud native era. It is lightweight and portable. It packages code and all required components so that application can run consistently in any environment and on any infrastructure. It mainly uses the capability provided by the Linux Kernel to implement resource isolation through `namespace`, implement resource restrictions through `cgroups`, and implement Copy on Write through `UnionFS`. If traditional deployment solutions are used, applications are difficult to migrate, and developers have to spend a lot of time adapting to the new environment. The microservice and DevOps mentioned above simply won't happen. It can be said that containerization is an inevitable choice for cloud native applications. No containerization, no cloud native.
+Containerization is also the foundation of the cloud native era. It is lightweight and portable. It packages code and all required components so that application can run consistently in any environment and on any infrastructure. It mainly uses the capability provided by the Linux Kernel to implement resource isolation through `namespace`, implement resource restrictions through `cgroups`, and implement Copy on Write through `UnionFS`. If traditional deployment solutions are used, applications are difficult to migrate, developers have to spend a lot of time adapting to the new environment and the microservice and DevOps mentioned above simply won't happen. It can be said that containerization is an inevitable choice for cloud native applications. No containerization, no cloud native.
 
 
 
@@ -53,7 +54,7 @@ On the single modules of Traffic Observer, the functions of each module and the 
 
 #### HTTP Proxy
 
-The reason why Go is chosen as the development language of the HTTP Proxy is that Go has execution performance like C and near-perfect compilation speed. At the same time, its concurrency mechanisms make it easy to write programs that get the most out of multicore and networked machines, which almost perfectly meets the needs of the HTTP Proxy in Traffic Observer to send requests to Traffic Detector and process Prometheus requests at the same time.
+The reason why Go is chosen as the development language of the HTTP Proxy is that Go has C-like execution performance and near-perfect compilation speed. At the same time, its concurrency mechanisms make it easy to write programs that get the most out of multicore and networked machines, which almost perfectly meets the needs of the HTTP Proxy in Traffic Observer to send requests to Traffic Detector and process Prometheus requests at the same time.
 
 #### Traffic Detector
 
@@ -61,7 +62,7 @@ Traffic Observer uses FastAPI to equip machine model to analyze malicious traffi
 
 #### Prometheus
 
-Prometheus, a Cloud Native Computing Foundation project, is a systems and service monitoring system. It is able to collect and store its metrics as time series data, i.e.  metrics information is stored with the timestamp at which it was recorded, alongside optional key-value pairs called labels. This feature undoubtedly fits well with Traffic Observer's demands for storing traffic information.
+Prometheus, a Cloud Native Computing Foundation project, is a systems and service monitoring system. It is able to collect and store its metrics as time series data, i.e. metrics information is stored with the timestamp at which it was recorded, alongside optional key-value pairs called labels. This feature undoubtedly fits well with Traffic Observer's demands for storing traffic information.
 
 #### Grafana
 

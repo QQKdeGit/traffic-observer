@@ -7,13 +7,14 @@ Traffic Observer 是一个[云原生](https://github.com/cncf/toc/blob/main/DEFI
 ## 架构概述
 
 <p align="center">
-  <img alt="Architecture" src="/docs/images/architecture-cn.svg" width="50%">
+  <img alt="Architecture" src="/docs/images/architecture-cn.svg" width="60%">
 </p>
+
 
 鸟瞰 Traffic Observer ，整个项目可以分为四个部分：HTTP 代理、流量检测器、Prometheus 以及 Grafana 。其功能分别为：
 
 1. HTTP 代理：接收想访问某网页的 HTTP 请求，提取流量信息，并将其作为参数发送一个 POST 请求给流量检测器
-2. 流量检测器：每当收到来自 HTTP 代理发送的 POST 请求时，就将参数解析成 HTTP 请求的数组，分析该网络流量是否为恶意流量，并返回结果
+2. 流量检测器：接受来自 HTTP 代理发送的 POST 请求，分析网络流量是否为恶意流量，并返回结果
 3. [Prometheus](https://prometheus.io)：向 HTTP 代理发送请求，获取已分析好的流量数据，并存入时序数据库（time-series database）中
 4. [Grafana](https://grafana.com)：从 Prometheus 中获取数据，并提供可视化、用户管理等功能
 
