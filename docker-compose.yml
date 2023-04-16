@@ -35,7 +35,6 @@ services:
       - 8079:8079
       - 8080:8080
     restart: unless-stopped
-    command: -d
 
   traffic-detector:
     image: traffic-detector

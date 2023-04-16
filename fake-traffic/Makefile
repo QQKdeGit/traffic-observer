@@ -1,7 +1,17 @@
-all: nginx fake-traffic
+NAME  = fake-traffic
+ENTRY = .
 
-nginx:
-	docker run --rm -it -p 8054:80 nginx
+MAKEFLAGS += --always-make
 
-fake-traffic:
-	bash fake-traffic.sh
+all: build container
+
+build:
+	CGO_ENABLED=0 \
+	go build \
+	-gcflags="all=-trimpath=." \
+	-asmflags="all=-trimpath=." \
+	-ldflags="-s -w" \
+	-o bin/$(NAME) $(ENTRY)
+
+container:
+	docker build -t $(NAME) .
