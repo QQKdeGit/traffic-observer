@@ -13,9 +13,11 @@ import (
 	"github.com/elazarl/goproxy"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	"math/rand"
 )
 
-var TEST_MODE = true
+var testMode = true
 
 func main() {
 	listenPort, serverPort := 8079, 8080
@@ -34,6 +36,16 @@ func setGoProxy(listenPort int) {
 	proxy := goproxy.NewProxyHttpServer()
 	// proxy.Verbose = true
 
+	proxy.OnResponse().DoFunc(func(resp *http.Response, ctx *goproxy.ProxyCtx) *http.Response {
+		// fmt.Printf("%#v\n", resp)
+
+		return resp
+	})
+
+	if testMode {
+		rand.Seed(time.Now().UnixNano())
+	}
+
 	proxy.OnRequest().DoFunc(func(req *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
 		traffic := TrafficMetadata{
 			UserAgent:        req.UserAgent(),
@@ -50,6 +62,10 @@ func setGoProxy(listenPort int) {
 			Host:             req.URL.Host,
 			Path:             req.URL.Path,
 			IsMalicious:      -1.0,
+		}
+
+		if testMode {
+			traffic.Path = testData[rand.Intn(3305)]
 		}
 
 		// TransferEncoding may be nil
@@ -171,18 +187,10 @@ func trafficDetect(trafficList []TrafficMetadata) []TrafficMetadata {
 
 	var resp *http.Response
 
-	if TEST_MODE {
-		resp, err = http.Post("http://traffic-detector:8000/test", "application/json", strings.NewReader(string(arg)))
-		if err != nil {
-			log.Println("Post to detector error: ", err)
-			return nil
-		}
-	} else {
-		resp, err = http.Post("http://traffic-detector:8000/detect", "application/json", strings.NewReader(string(arg)))
-		if err != nil {
-			log.Println("Post to detector error: ", err)
-			return nil
-		}
+	resp, err = http.Post("http://traffic-detector:8000/detect", "application/json", strings.NewReader(string(arg)))
+	if err != nil {
+		log.Println("Post to detector error: ", err)
+		return nil
 	}
 
 	body, err := io.ReadAll(resp.Body)

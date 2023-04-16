@@ -1,5 +1,5 @@
 NAME  = httpproxy
-ENTRY = main.go
+ENTRY = .
 
 MAKEFLAGS += --always-make
 
