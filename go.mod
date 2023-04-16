@@ -1,4 +1,4 @@
-module github.com/QQKdeGit/httpproxy
+module github.com/QQKdeGit/traffic-observer
 
 go 1.19
 

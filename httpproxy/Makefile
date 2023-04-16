@@ -14,4 +14,4 @@ build:
 	-o bin/$(NAME) $(ENTRY)
 
 container:
-	docker build -t httpproxy .
+	docker build -t $(NAME) .

@@ -35,10 +35,19 @@ services:
       - 8079:8079
       - 8080:8080
     restart: unless-stopped
+    command: -d
 
   traffic-detector:
     image: traffic-detector
     container_name: traffic-detector
+    # network_mode: host
+    ports:
+      - 8000:8000
+    restart: unless-stopped
+
+  httpserver:
+    image: httpserver
+    container_name: httpserver
     # network_mode: host
     ports:
       - 8000:8000
