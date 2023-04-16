@@ -49,5 +49,5 @@ services:
     container_name: httpserver
     # network_mode: host
     ports:
-      - 8000:8000
+      - 8001:8001
     restart: unless-stopped

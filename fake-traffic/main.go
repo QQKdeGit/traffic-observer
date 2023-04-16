@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -46,6 +47,8 @@ func init() {
 	malwarePath = splitCSV(malware)
 }
 
+var root = "http://172.20.62.49:8001"
+
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
@@ -57,27 +60,35 @@ func main() {
 
 		switch rand.Intn(3) {
 		case 0:
-			path = "http://localhost:8000" + normalPath[rand.Intn(len(normalPath))]
+			path = root + normalPath[rand.Intn(len(normalPath))]
 		case 1:
-			path = "http://localhost:8000" + attackPath[rand.Intn(len(attackPath))]
+			path = root + attackPath[rand.Intn(len(attackPath))]
 		case 2:
-			path = "http://localhost:8000" + malwarePath[rand.Intn(len(malwarePath))]
+			path = root + malwarePath[rand.Intn(len(malwarePath))]
 		}
 
+		// 发送经过代理的请求，代理的端口号是8079
+		proxy := func(_ *http.Request) (*url.URL, error) {
+			return url.Parse("http://localhost:8079")
+		}
+		transport := &http.Transport{Proxy: proxy}
+		client := &http.Client{Transport: transport}
+
+		// 随机发送 get post delete put 请求
 		switch rand.Intn(4) {
 		case 0:
-			_, err = http.Get(path)
+			_, err = client.Get(path)
 			fmt.Println("GET", path)
 		case 1:
-			_, err = http.Post(path, "application/json", nil)
+			_, err = client.Post(path, "application/json", nil)
 			fmt.Println("POST", path)
 		case 2:
 			req, _ := http.NewRequest("DELETE", path, nil)
-			_, err = http.DefaultClient.Do(req)
+			_, err = client.Do(req)
 			fmt.Println("DELETE", path)
 		case 3:
 			req, _ := http.NewRequest("PUT", path, nil)
-			_, err = http.DefaultClient.Do(req)
+			_, err = client.Do(req)
 			fmt.Println("PUT", path)
 		}
 

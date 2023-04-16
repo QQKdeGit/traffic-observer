@@ -3,8 +3,6 @@ ENTRY = .
 
 MAKEFLAGS += --always-make
 
-all: build container
-
 build:
 	CGO_ENABLED=0 \
 	go build \
@@ -12,6 +10,3 @@ build:
 	-asmflags="all=-trimpath=." \
 	-ldflags="-s -w" \
 	-o bin/$(NAME) $(ENTRY)
-
-container:
-	docker build -t $(NAME) .

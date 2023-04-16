@@ -33,6 +33,10 @@ func setGoProxy(listenPort int) {
 	// proxy.Verbose = true
 
 	proxy.OnResponse().DoFunc(func(resp *http.Response, ctx *goproxy.ProxyCtx) *http.Response {
+		if resp == nil {
+			return resp
+		}
+
 		response := ResponseMetadata{
 			Status:           resp.Status,
 			StatusCode:       resp.StatusCode,
