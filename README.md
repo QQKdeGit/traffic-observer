@@ -9,7 +9,7 @@ See the [中文文档](/docs/readme_cn.md) for Chinese readme.
 ## Architecture overview
 
 <p align="center">
-  <img alt="Architecture" src="/docs/images/architecture.svg" width="60%">
+  <img alt="Architecture" src="docs/images/architecture.svg" width="60%">
 </p>
 
 
