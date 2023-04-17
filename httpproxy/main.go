@@ -93,7 +93,9 @@ func setGoProxy(listenPort int) {
 	// set timer to send traffic to detector
 	go func() {
 		for {
-			time.Sleep(5 * time.Second)
+			if len(responseToPrometheus) < 100 {
+				time.Sleep(5 * time.Second)
+			}
 
 			if len(requestToDetector) != 0 {
 				requestToPrometheus = append(requestToPrometheus, trafficDetect(requestToDetector)...)

@@ -67,29 +67,27 @@ func main() {
 			path = root + malwarePath[rand.Intn(len(malwarePath))]
 		}
 
-		// 发送经过代理的请求，代理的端口号是8079
 		proxy := func(_ *http.Request) (*url.URL, error) {
 			return url.Parse("http://localhost:8079")
 		}
 		transport := &http.Transport{Proxy: proxy}
 		client := &http.Client{Transport: transport}
 
-		// 随机发送 get post delete put 请求
 		switch rand.Intn(4) {
 		case 0:
 			_, err = client.Get(path)
-			fmt.Println("GET", path)
+			fmt.Println("\033[38;5;82mGET\033[0m", path)
 		case 1:
 			_, err = client.Post(path, "application/json", nil)
-			fmt.Println("POST", path)
+			fmt.Println("\033[38;5;81mPOST\033[0m", path)
 		case 2:
 			req, _ := http.NewRequest("DELETE", path, nil)
 			_, err = client.Do(req)
-			fmt.Println("DELETE", path)
+			fmt.Println("\033[38;5;196mDELETE\033[0m", path)
 		case 3:
 			req, _ := http.NewRequest("PUT", path, nil)
 			_, err = client.Do(req)
-			fmt.Println("PUT", path)
+			fmt.Println("\033[38;5;220mPUT\033[0m", path)
 		}
 
 		if err != nil {

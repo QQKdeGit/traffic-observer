@@ -35,14 +35,12 @@ def detect(traffic_list: List[Traffic]):
     for i in range(len(traffic_list)):
         traffic_list[i].IsMalicious = result[i]
 
-    print(result)
     return traffic_list
 
 
 @app.post("/detect2")
 def detect2(traffic: Traffic):
     traffic.IsMalicious = traffic_detect([traffic.Method + ' ' + traffic.Path])[0]
-    print(traffic.IsMalicious)
     return traffic
 
 
